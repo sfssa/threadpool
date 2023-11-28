@@ -8,7 +8,7 @@
 
 计算机在执行程序时可以简单的分为两种：CPU密集型和IO密集型。
 
-![image-20231128145157772](C:\Users\16645\AppData\Roaming\Typora\typora-user-images\image-20231128145157772.png)
+![image-20231128145157772](https://github.com/sfssa/threadpool/blob/master/static/threadNums.png)
 
 ### CPU密集型
 
