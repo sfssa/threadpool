@@ -1,8 +1,21 @@
+/*
+ * @Author: atpdxy
+ * @Date: 2023-11-28 09:41:52
+ * @Version: 1.0
+ * @LastEditors: sfssa 1664549131@qq.com
+ * @LastEditTime: 2023-11-28 15:56:31
+ * @Description: 
+ */
 #include "thread.h"
 #include <iostream>
 
 static int shared=0;
 
+/**
+ * @description: 模拟线程执行过程
+ * @param {int} i 线程id
+ * @return {*}
+ */
 void function(int i){
     std::cout<<"Task "<<i<<" begin working!"<<std::endl;
     ++shared;
@@ -10,6 +23,23 @@ void function(int i){
     std::cout<<"Task "<<i<<" finish work"<<std::endl;
 }
 
+/**
+ * @description: 检验拷贝构造函数和赋值运算符
+ * @return {*}
+ */
+void test_for_copy(){
+    atpdxy::ThreadPool pool(4);
+    // 下面的代码都会导致编译报错
+    // atpdxy::ThreadPool pool1=pool;
+    // atpdxy::ThreadPool pool2(pool);
+    // atpdxy::ThreadPool pool3(std::move(pool));
+    // atpdxy::ThreadPool pool4=std::move(pool);
+}
+
+/**
+ * @description: 检验线程池的执行
+ * @return {*}
+ */
 void test_thread(){
     atpdxy::ThreadPool pool(4);
     std::vector<std::future<void>> futures;

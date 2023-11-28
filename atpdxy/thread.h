@@ -1,3 +1,11 @@
+/*
+ * @Author: atpdxy
+ * @Date: 2023-11-26 23:02:24
+ * @Version: 1.0
+ * @LastEditors: sfssa 1664549131@qq.com
+ * @LastEditTime: 2023-11-28 15:50:06
+ * @Description: C++线程池
+ */
 #pragma once
 
 #include <vector>
@@ -9,6 +17,7 @@
 #include <utility>
 #include <future>
 #include <stdexcept>
+#include "noncopyable.h"
 
 namespace atpdxy{
 
@@ -19,11 +28,11 @@ const size_t THREAD_ID_TASK = 9;
 // 是否自动增长
 #define AUTO_GROW
 
-class ThreadPool{
+class ThreadPool : public Noncopyable{
 public:
     // 任务函数指针
     typedef std::function<void()> Task;
-
+   
     explicit ThreadPool(size_t n)
         :thread_nums(n)
     {
@@ -56,7 +65,7 @@ public:
     ~ThreadPool(){
         stop();
     }
-
+ 
     template <class Function,class ... Args>
     std::future<typename std::result_of<Function(Args...)>::type>   // 返回类型
     addTask(Function&& func,Args&&... args){
@@ -90,12 +99,12 @@ public:
             }
         }
     }
-private:
-    // 取消左值和右值的拷贝构造函数和拷贝赋值运算符
-    ThreadPool(ThreadPool&)=delete;
-    ThreadPool& operator=(const ThreadPool&)=delete;
-    ThreadPool(ThreadPool&&)=delete;
-    ThreadPool& operator=(ThreadPool&&)=delete;
+// private:
+//     // 取消左值和右值的拷贝构造函数和拷贝赋值运算符
+//     ThreadPool(ThreadPool&)=delete;
+//     ThreadPool& operator=(const ThreadPool&)=delete;
+//     ThreadPool(ThreadPool&&)=delete;
+//     ThreadPool& operator=(ThreadPool&&)=delete;
 private:
     // 线程池线程数量
     size_t thread_nums=0;
