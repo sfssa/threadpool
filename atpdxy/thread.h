@@ -99,12 +99,7 @@ public:
             }
         }
     }
-// private:
-//     // 取消左值和右值的拷贝构造函数和拷贝赋值运算符
-//     ThreadPool(ThreadPool&)=delete;
-//     ThreadPool& operator=(const ThreadPool&)=delete;
-//     ThreadPool(ThreadPool&&)=delete;
-//     ThreadPool& operator=(ThreadPool&&)=delete;
+
 private:
     // 线程池线程数量
     size_t thread_nums=0;
