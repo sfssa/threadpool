@@ -59,17 +59,20 @@ public:
 
     template <class Function,class ... Args>
     std::future<typename std::result_of<Function(Args...)>::type>   // 返回类型
-    add(Function&& func,Args&&... args){
+    addTask(Function&& func,Args&&... args){
         // 声明返回值
         typedef typename std::result_of<Function(Args...)>::type return_type;
-        auto it=std::make_shared<Task>(std::bind(std::forward<Function(func),std::forward<Args>(args)...));
+        // 类型别名task，接受一个没有参数并返回return_type的可调用对象
+        typedef std::packaged_task<return_type()> task;
+        // 创建一个智能指针，指向一个packaged_task，封装了传递给线程池人物的函数和参数
+        auto it = std::make_shared<task>(std::bind(std::forward<Function>(func), std::forward<Args>(args)...));
         auto ret=it->get_future();
         {
             std::lock_guard<std::mutex> lock(m_mutex);
             if(!is_running.load(std::memory_order_acquire)){
                 throw std::runtime_error("thread pool has stopped");
             }
-            m_tasks.emplace([it]{(*it)();})
+            m_tasks.emplace([it]{(*it)();});
         }
         m_cond.notify_one();
         return ret;
@@ -79,6 +82,13 @@ public:
         // 修改原子变量并唤醒所有线程执行
         is_running.store(false,std::memory_order_release);
         m_cond.notify_all();
+
+        // 等待所有任务完成
+        for (auto& thread : m_threads) {
+            if (thread.joinable()) {
+                thread.join();
+            }
+        }
     }
 private:
     // 取消左值和右值的拷贝构造函数和拷贝赋值运算符
@@ -90,7 +100,7 @@ private:
     // 线程池线程数量
     size_t thread_nums=0;
     // 线程池是否正在工作中，默认没有运行
-    std::atomic<bool> is_running={false};
+    std::atomic<bool> is_running={true};
     // 线程池中空闲线程的数量
     // size_t free_threads=0;
     // 线程池线程容器
