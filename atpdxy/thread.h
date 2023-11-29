@@ -18,6 +18,7 @@
 #include <future>
 #include <stdexcept>
 #include "noncopyable.h"
+#include "spinlock.h"
 
 namespace atpdxy{
 

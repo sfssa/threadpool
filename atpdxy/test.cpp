@@ -3,16 +3,18 @@
  * @Date: 2023-11-28 09:41:52
  * @Version: 1.0
  * @LastEditors: sfssa 1664549131@qq.com
- * @LastEditTime: 2023-11-28 23:11:26
+ * @LastEditTime: 2023-11-29 09:47:26
  * @Description: 
  */
 #include "thread.h"
+#include "spinlock.h"
 #include <iostream>
 #include <cmath>
 #include <thread>
 
 // 测试共享访问数据的准确性
 static int shared=0;
+atpdxy::SpinLock lock;
 
 /**
  * @description: 模拟线程执行过程
@@ -69,6 +71,27 @@ void ioIntensiveTask(int id){
     std::cout<<"I/O-bind task "<<id<<" finish work"<<std::endl;
 }
 
+void concurrentTask(int id){
+    atpdxy::SpinLockGuard lock_guard(lock);
+    std::cout<<"Thread "<<id<<" start working"<<std::endl;
+    ++shared;
+    std::cout<<"Thread "<<id<<" finish work"<<std::endl;
+}   
+
+void test_spinLock(){
+    int nums=std::thread::hardware_concurrency();
+    std::vector<std::thread> threads;
+    for(int i=0;i<nums;++i){
+        threads.emplace_back(concurrentTask,i+1);
+    }
+
+    for(auto& thread:threads){
+        if(thread.joinable()){
+            thread.join();
+        }
+    }
+}
+
 void test(std::function<void(int)> task){
     int thread_nums=std::thread::hardware_concurrency();
     // int thread_nums=std::thread::hareare_concurrenty()+1;
@@ -88,7 +111,8 @@ int main(){
     auto start=std::chrono::high_resolution_clock::now();
     // test_thread();
     // test_cpuIntensiveTask();
-    test(cpuIntensiveTask);
+    // test(cpuIntensiveTask);
+    test_spinLock();
     auto end=std::chrono::high_resolution_clock::now();
     auto duration=std::chrono::duration_cast<std::chrono::milliseconds>(end-start);
     // std::cout<<"The value of shared is "<<shared<<" Finally!"<<std::endl;
